@@ -75,16 +75,13 @@ def heart_tracks
   FROM
     albums a
   JOIN
-    (SELECT
-      *
-     FROM
-      tracks
-     WHERE
-      song LIKE '%Heart%') t ON t.album = a.asin
+    tracks t ON t.album = a.asin
+  WHERE
+    song LIKE '%Heart%'
   GROUP BY
     a.title
   ORDER BY
-    count(t.song) DESC, a.title
+    COUNT(t.song) DESC, a.title
 
   SQL
 end
@@ -122,13 +119,13 @@ def song_title_counts
   # COUNT of times they show up.
   execute(<<-SQL)
     SELECT
-      t.song, count(song)
+      t.song, COUNT(song)
     FROM
       tracks t
     GROUP BY
       t.song
     HAVING
-      count(t.song) > 2
+      COUNT(t.song) > 2
   SQL
 end
 
@@ -143,23 +140,13 @@ def best_value
       albums a
     JOIN
       (SELECT
-        album, count(song) song_count
+        album, COUNT(song) song_count
        FROM
         tracks
        GROUP BY
         album) t ON t.album = a.asin
      WHERE
       a.price / t.song_count < .5
-    -- SELECT
-    --   a.title, round(avg(a.price), 2), count(t.song)
-    -- FROM
-    --   albums a
-    -- JOIN
-    --   tracks t ON t.album = a.asin
-    -- GROUP BY
-    --   a.title
-    -- HAVING
-    --   avg(a.price) / count(t.song) < .5
   SQL
 end
 
@@ -169,7 +156,7 @@ def top_track_counts
   # album title and the track count.
   execute(<<-SQL)
     SELECT
-      a.title, count(t.song)
+      a.title, COUNT(t.song)
     FROM
       albums a
     JOIN
@@ -177,7 +164,7 @@ def top_track_counts
     GROUP BY
       a.title
     ORDER BY
-      count(t.song) DESC
+      COUNT(t.song) DESC
     LIMIT 10
   SQL
 end
@@ -186,31 +173,18 @@ def rock_superstars
   # Select the artist who has recorded the most rock albums, as well as the
   # number of albums. HINT: use LIKE '%Rock%' in your query.
   execute(<<-SQL)
-    -- SELECT
-    --   a.artist, count(a.title)
-    -- FROM
-    --   albums a
-    -- JOIN
-    --   styles s ON s.album = a.asin
-    -- WHERE
-    --   s.style LIKE '%Rock%'
-    -- GROUP BY
-    --   a.artist
     SELECT DISTINCT
       a.artist, count(a.asin)
     FROM
       albums a
     JOIN
-      (SELECT DISTINCT
-        *
-       FROM
-        styles
-       WHERE
-        style LIKE '%Rock%') s ON s.album = a.asin
+      styles s ON s.album = a.asin
+    WHERE
+      style LIKE '%Rock%'
     GROUP BY
       a.artist, s.style
     ORDER BY
-      count(a.asin) DESC
+      COUNT(a.asin) DESC
     LIMIT 1
   SQL
 end
@@ -225,24 +199,20 @@ def expensive_tastes
   # determine the average price per track.
   execute(<<-SQL)
   SELECT
-    s.style, sum(a.price) / sum(t.song_count) average_track_price
+    s.style, SUM(a.price) / SUM(t.song_count) average_track_price
   FROM
     styles s
   JOIN
     (SELECT
-      album, count(song) song_count
+      album, COUNT(song) song_count
      FROM
       tracks
      GROUP BY
       album) t ON t.album = s.album
    JOIN
-    (SELECT DISTINCT
-      *
-     FROM
-      albums
-     WHERE
-      price IS NOT NULL ) a
-   ON a.asin = t.album
+     albums a ON a.asin = t.album
+   WHERE
+      a.price IS NOT NULL
    GROUP BY
     s.style
    ORDER BY

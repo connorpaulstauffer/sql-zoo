@@ -37,7 +37,6 @@ def all_teachers_join
     teachers t
   LEFT JOIN
     depts d ON d.id = t.dept_id
-
   SQL
 end
 
@@ -64,7 +63,6 @@ def teachers_and_mobiles
     name, COALESCE(mobile, '07986 444 2266')
   FROM
     teachers
-
   SQL
 end
 
@@ -88,7 +86,7 @@ def num_teachers_and_mobiles
   # NB: COUNT only counts non-NULL values.
   execute(<<-SQL)
   SELECT
-    count(name), count(mobile)
+    COUNT(name), COUNT(mobile)
   FROM
     teachers
   SQL
@@ -100,7 +98,7 @@ def dept_staff_counts
   # Engineering department is listed.
   execute(<<-SQL)
   SELECT
-    d.name, count(t.name)
+    d.name, COUNT(t.name)
   FROM
     teachers t
   RIGHT JOIN
@@ -116,11 +114,10 @@ def teachers_and_divisions
   execute(<<-SQL)
   SELECT
     name, CASE WHEN dept_id IN (1, 2) THEN 'Sci'
-         ELSE 'Art'
-         END
+          ELSE 'Art'
+          END
   FROM
     teachers
-
   SQL
 end
 
@@ -133,7 +130,7 @@ def teachers_and_divisions_two
     name, CASE WHEN dept_id IN (1, 2) THEN 'Sci'
                WHEN dept_id = 3 THEN 'ART'
                ELSE 'None'
-         END
+               END
   FROM
     teachers
   SQL
